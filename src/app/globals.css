@@ -1,23 +1,36 @@
 :root {
-  /* Colors - Modern Bright Theme */
-  --background: #fdfdfd;
+  /* Colors - Premium Curved Purple & Amber Accent Theme */
+  --background: #f4f6fb;
   --surface: #ffffff;
   --surface-subtle: #f8fafc;
   --surface-hover: #f1f5f9;
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
-  --primary-light: #eef2ff;
-  --accent: #10b981;
-  --accent-light: #ecfdf5;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
+  
+  --primary: #5b21b6; /* Rich Royal Purple */
+  --primary-hover: #4c1d95;
+  --primary-light: #ede9fe;
+  
+  --primary-gradient: linear-gradient(135deg, #2e0854 0%, #4c1d95 60%, #6366f1 100%);
+  --secondary-gradient: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); /* Dark navy cards */
+  
+  --accent: #fbbf24; /* Warm Gold/Yellow Accent for actions */
+  --accent-hover: #f59e0b;
+  --accent-light: #fef3c7;
+  
+  --emerald: #10b981;
+  --emerald-light: #d1fae5;
+  --danger: #ef4444;
+  --danger-light: #fee2e2;
+  
+  --text-main: #0f172a; /* Deep Slate Navy */
+  --text-muted: #57657a;
   --text-light: #94a3b8;
-  --border: #e2e8f0;
+  
+  --border: rgba(226, 232, 240, 0.8);
   --border-focus: #c7d2fe;
   
-  /* Glassmorphism - Light Version */
-  --glass: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.4);
+  /* Glassmorphism settings */
+  --glass: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.5);
   
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -26,19 +39,20 @@
   --spacing-lg: 1.5rem;
   --spacing-xl: 3rem;
   
-  /* Effects */
+  /* Effects - Realistic curves matching reference (24px) */
   --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-lg: 16px;
+  --radius-lg: 18px;
   --radius-xl: 24px;
   --radius-full: 9999px;
   
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
+  --shadow-lg: 0 12px 28px -6px rgba(15, 23, 42, 0.08), 0 8px 12px -4px rgba(15, 23, 42, 0.04);
+  --shadow-xl: 0 24px 38px -8px rgba(15, 23, 42, 0.12), 0 12px 18px -6px rgba(15, 23, 42, 0.06);
+  --shadow-purple: 0 12px 24px -6px rgba(91, 33, 182, 0.3);
   
-  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
@@ -71,6 +85,11 @@ button {
   transition: var(--transition);
 }
 
+/* Premium micro-animations */
+button:active {
+  transform: scale(0.96);
+}
+
 img {
   max-width: 100%;
   height: auto;
@@ -84,12 +103,13 @@ input, select, textarea {
 
 /* Layout Utilities */
 .container {
-  max-width: 1280px;
+  width: 100%;
+  max-width: 1440px;
   margin: 0 auto;
   padding: 0 var(--spacing-lg);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .container {
     padding: 0 var(--spacing-md);
   }
@@ -97,13 +117,13 @@ input, select, textarea {
 
 .glass-effect {
   background: var(--glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border);
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, var(--primary) 0%, #818cf8 100%);
+  background: linear-gradient(135deg, #fbbf24 0%, #6366f1 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -115,33 +135,43 @@ input, select, textarea {
   min-height: calc(100vh - 80px);
 }
 
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding-top: 68px; /* Compensate for mobile top navbar! */
+    padding-bottom: 140px; /* Space for bottom dock navigation */
+  }
+}
+
 /* Common Components */
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 12px;
+  gap: 6px;
+  padding: 6px 14px;
   border-radius: var(--radius-full);
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  background: var(--primary-light);
-  color: var(--primary);
+  letter-spacing: 0.06em;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--surface-subtle);
+  background: var(--background);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: #cbd5e1;
   border-radius: var(--radius-full);
-  border: 3px solid var(--surface-subtle);
+  border: 2px solid var(--background);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -154,3 +184,27 @@ input, select, textarea {
   color: var(--primary);
 }
 
+/* Keyframe animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-fade-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

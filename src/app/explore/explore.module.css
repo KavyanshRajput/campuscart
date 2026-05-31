@@ -3,27 +3,27 @@
 }
 
 .header {
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: 32px;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: 20px;
 }
 
 .headerTitle h1 {
-  font-size: 2.5rem;
-  font-weight: 800;
-  margin-bottom: var(--spacing-xs);
-  letter-spacing: -0.02em;
+  font-size: 2rem;
+  font-weight: 850;
+  margin-bottom: 4px;
+  letter-spacing: -0.03em;
 }
 
 .headerTitle p {
   color: var(--text-muted);
-  font-size: 1.1rem;
+  font-size: 0.95rem;
 }
 
 .searchBarWrapper {
   display: flex;
-  gap: var(--spacing-md);
+  gap: 12px;
   align-items: center;
 }
 
@@ -34,8 +34,8 @@
   border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
-  padding: 0 20px;
-  height: 56px;
+  padding: 0 16px;
+  height: 52px;
   transition: var(--transition);
   box-shadow: var(--shadow-sm);
 }
@@ -43,42 +43,47 @@
 .searchBar:focus-within {
   border-color: var(--primary);
   box-shadow: var(--shadow-md);
-  background: white;
 }
 
 .searchIcon {
   color: var(--text-light);
-  margin-right: 12px;
+  margin-right: 10px;
 }
 
 .searchBar input {
   background: transparent;
   border: none;
   color: var(--text-main);
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 0.95rem;
+  font-weight: 600;
   width: 100%;
   outline: none;
 }
 
+.searchBar input::placeholder {
+  color: var(--text-light);
+}
+
 .filterBtn {
-  height: 56px;
-  padding: 0 24px;
+  height: 52px;
+  padding: 0 20px;
   background: white;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: var(--text-main);
-  font-weight: 600;
+  gap: 8px;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.85rem;
   transition: var(--transition);
   box-shadow: var(--shadow-sm);
 }
 
 .filterBtn:hover {
   background: var(--surface-hover);
-  border-color: var(--text-muted);
+  border-color: var(--text-light);
+  color: var(--text-main);
 }
 
 /* Controls */
@@ -86,9 +91,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-xl);
-  padding-bottom: var(--spacing-md);
-  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
 }
 
 .categoryTabs {
@@ -97,6 +102,9 @@
   overflow-x: auto;
   padding-bottom: 4px;
   scrollbar-width: none;
+  width: 100%;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .categoryTabs::-webkit-scrollbar {
@@ -104,14 +112,15 @@
 }
 
 .tab {
-  padding: 8px 24px;
+  padding: 6px 18px;
   border-radius: var(--radius-full);
   background: white;
   border: 1px solid var(--border);
   color: var(--text-muted);
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-weight: 700;
+  font-size: 0.82rem;
   white-space: nowrap;
+  flex-shrink: 0;
   transition: var(--transition);
 }
 
@@ -122,10 +131,10 @@
 }
 
 .activeTab {
-  background: var(--primary);
-  border-color: var(--primary);
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
   color: white !important;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  box-shadow: var(--shadow-purple);
 }
 
 .viewToggle {
@@ -133,13 +142,16 @@
   background: var(--surface-subtle);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 4px;
+  padding: 2px;
 }
 
 .viewToggle button {
-  padding: 6px 12px;
+  padding: 6px 10px;
   border-radius: var(--radius-sm);
   color: var(--text-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: var(--transition);
 }
 
@@ -149,35 +161,57 @@
   box-shadow: var(--shadow-sm);
 }
 
-/* Grids */
+/* Grids & Lists */
 .productGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 32px;
-  animation: slideUp 0.6s ease-out;
+  grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
+  gap: 16px;
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (max-width: 480px) {
+  .productGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (min-width: 640px) {
+  .productGrid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 24px;
+  }
 }
 
 .productList {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  animation: slideUp 0.6s ease-out;
+  gap: 16px;
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .loadingGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--spacing-xl);
+  grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .loadingGrid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 24px;
+  }
 }
 
 .skeletonCard {
-  height: 380px;
-  background: var(--surface-subtle);
+  height: 250px;
+  background: white;
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   position: relative;
   overflow: hidden;
@@ -186,10 +220,7 @@
 .skeletonCard::after {
   content: '';
   position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  top: 0; right: 0; bottom: 0; left: 0;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
   animation: shimmer 1.5s infinite;
 }
@@ -201,61 +232,61 @@
 
 .emptyState {
   text-align: center;
-  padding: 80px 20px;
-  background: white;
+  padding: 60px 20px;
+  background: var(--surface-subtle);
   border-radius: var(--radius-xl);
   border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: var(--shadow-sm);
   animation: slideUp 0.6s ease-out;
 }
 
 .emptyIconWrapper {
-  width: 80px;
-  height: 80px;
-  background: var(--surface-subtle);
+  width: 64px;
+  height: 64px;
+  background: white;
   color: var(--primary);
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
 }
 
 .emptyState h3 {
-  font-size: 1.5rem;
+  font-size: 1.15rem;
   font-weight: 800;
   color: var(--text-main);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .emptyState p {
   color: var(--text-light);
-  margin-bottom: 32px;
-  max-width: 360px;
+  margin-bottom: 20px;
+  max-width: 240px;
+  font-size: 0.78rem;
 }
 
 .resetBtn {
-  padding: 12px 32px;
+  padding: 8px 24px;
   background: var(--primary);
   color: white;
   border-radius: var(--radius-md);
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+  font-size: 0.78rem;
+  box-shadow: var(--shadow-purple);
   transition: var(--transition);
 }
 
 .resetBtn:hover {
   background: var(--primary-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
 }
 
 @media (max-width: 768px) {
   .headerTitle h1 {
-    font-size: 2rem;
+    font-size: 1.6rem;
   }
   
   .searchBarWrapper {
@@ -270,11 +301,225 @@
   .controls {
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
+    gap: 12px;
+    width: 100%;
   }
   
   .viewToggle {
     align-self: flex-end;
   }
+}
+
+/* ==========================================================================
+   Premium Explore Split Layout & Filters Sidebar Styles
+   ========================================================================== */
+
+.filterSidebar {
+  display: none;
+}
+
+@media (min-width: 1025px) {
+  .exploreGrid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 32px;
+    align-items: flex-start;
+  }
+  
+  .mainFeedGrid {
+    min-width: 0; /* Prevents grid layout clipping */
+  }
+  
+  .filterSidebar {
+    display: block;
+    position: sticky;
+    top: 96px;
+    z-index: 50;
+  }
+}
+
+/* Sidebar Widgets Cards */
+.sidebarCard {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl); /* 24px */
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebarCard:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(91, 33, 182, 0.2);
+}
+
+.sidebarTitle {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+}
+
+.sidebarTitleIcon {
+  color: var(--primary);
+}
+
+/* Filter Sections */
+.filterSection {
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filterSection:last-of-type {
+  margin-bottom: 20px;
+}
+
+.filterLabel {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--text-main);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0;
+}
+
+.priceHighlight {
+  color: var(--primary);
+  font-weight: 850;
+}
+
+/* Price Range Slider */
+.priceRangeInput {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: #e2e8f0;
+  outline: none;
+  transition: var(--transition);
+}
+
+.priceRangeInput::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid white;
+  transition: var(--transition);
+}
+
+.priceRangeInput::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 10px rgba(91, 33, 182, 0.4);
+}
+
+.rangeLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+/* Checkbox Inputs */
+.checkboxGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.checkboxLabel:hover {
+  color: var(--primary);
+}
+
+.checkboxLabel input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* Keyword Badges */
+.keywordGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.keywordBadge {
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  background: var(--surface-subtle);
+  border: 1px solid var(--border);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.keywordBadge:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary-light);
+}
+
+.activeKeyword {
+  background: var(--primary) !important;
+  color: white !important;
+  border-color: var(--primary) !important;
+  box-shadow: var(--shadow-purple);
+}
+
+/* Sidebar Reset Button */
+.sidebarResetBtn {
+  width: 100%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  color: var(--text-muted);
+  border-radius: var(--radius-lg);
+  font-size: 0.82rem;
+  font-weight: 750;
+  transition: var(--transition);
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+}
+
+.sidebarResetBtn:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  box-shadow: var(--shadow-purple);
 }
 

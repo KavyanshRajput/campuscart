@@ -174,7 +174,7 @@ export default function SellPage() {
         <div className={styles.imageNote}>
           <Sparkles size={24} style={{ color: 'var(--primary)', marginBottom: '8px' }} />
           <h3>Smart Image Enabled</h3>
-          <p>We'll automatically assign a high-quality, accurate photo based on your chosen category to make your listing stand out.</p>
+          <p>We&apos;ll automatically assign a high-quality, accurate photo based on your chosen category to make your listing stand out.</p>
         </div>
 
         {error && <div style={{ color: '#ef4444', marginBottom: '20px', textAlign: 'center', fontSize: '0.9rem', fontWeight: '500' }}>{error}</div>}

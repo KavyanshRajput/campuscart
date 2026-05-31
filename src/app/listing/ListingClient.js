@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
 import { 
   ChevronLeft, 
   MapPin, 
@@ -15,13 +16,15 @@ import {
   MessageCircle,
   ShieldCheck,
   Zap,
-  ArrowRight
+  ArrowRight,
+  AlertTriangle
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './listing.module.css';
 
 export default function ListingClient({ id }) {
+  const router = useRouter();
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
@@ -37,7 +40,12 @@ export default function ListingClient({ id }) {
         const docRef = doc(db, "listings", id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setListing({ id: docSnap.id, ...docSnap.data() });
+          const itemData = { id: docSnap.id, ...docSnap.data() };
+          setListing(itemData);
+          
+          // Check favorite status
+          const favs = JSON.parse(localStorage.getItem('savedItems') || '[]');
+          setIsFavorite(favs.includes(itemData.id));
         }
       } catch (error) {
         console.error("Error fetching listing:", error);
@@ -46,13 +54,42 @@ export default function ListingClient({ id }) {
       }
     }
     fetchListing();
+
+    // Listen to changes from other parts of the app
+    const handleFavSync = () => {
+      const favs = JSON.parse(localStorage.getItem('savedItems') || '[]');
+      if (id) setIsFavorite(favs.includes(id));
+    };
+
+    window.addEventListener('favoritesChanged', handleFavSync);
+    return () => window.removeEventListener('favoritesChanged', handleFavSync);
   }, [id]);
+
+  const toggleFavorite = () => {
+    if (!listing) return;
+    const favs = JSON.parse(localStorage.getItem('savedItems') || '[]');
+    let updated;
+    if (favs.includes(listing.id)) {
+      updated = favs.filter(x => x !== listing.id);
+      setIsFavorite(false);
+    } else {
+      updated = [...favs, listing.id];
+      setIsFavorite(true);
+    }
+    localStorage.setItem('savedItems', JSON.stringify(updated));
+    window.dispatchEvent(new Event('favoritesChanged'));
+  };
+
+  const startChat = () => {
+    if (!listing) return;
+    router.push(`/profile?tab=chat&startChat=${listing.sellerId}&itemName=${encodeURIComponent(listing.title)}`);
+  };
 
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loader}></div>
-        <p>Loading the best deals for you...</p>
+        <p>Retrieving campus deal...</p>
       </div>
     );
   }
@@ -73,8 +110,10 @@ export default function ListingClient({ id }) {
     );
   }
 
+  const isSold = listing.status === 'sold';
+
   return (
-    <div className={`${styles.page} container animate-fade`}>
+    <div className={`${styles.page} container animate-fade-up`}>
       <nav className={styles.breadcrumb}>
         <Link href="/explore" className={styles.backLink}>
           <ChevronLeft size={20} />
@@ -95,9 +134,10 @@ export default function ListingClient({ id }) {
             />
             <button 
               className={`${styles.favoriteBtn} ${isFavorite ? styles.isFavorite : ''}`}
-              onClick={() => setIsFavorite(!isFavorite)}
+              onClick={toggleFavorite}
+              title={isFavorite ? "Remove from Saved" : "Save Item"}
             >
-              <Heart size={24} fill={isFavorite ? "currentColor" : "none"} />
+              <Heart size={22} fill={isFavorite ? "currentColor" : "none"} />
             </button>
           </div>
           
@@ -132,6 +172,17 @@ export default function ListingClient({ id }) {
             </div>
           </div>
 
+          {/* Sold Alert Banner */}
+          {isSold && (
+            <div className={styles.soldAlert}>
+              <AlertTriangle size={20} />
+              <div>
+                <strong>This listing has been sold</strong>
+                <p>The seller has completed this transaction. Feel free to browse similar items.</p>
+              </div>
+            </div>
+          )}
+
           <div className={styles.descriptionCard}>
             <h3>Description</h3>
             <p>{listing.description}</p>
@@ -157,18 +208,27 @@ export default function ListingClient({ id }) {
             </div>
 
             <div className={styles.actions}>
-              <a href={`mailto:${listing.sellerEmail}`} className={styles.primaryAction}>
-                <Mail size={20} />
+              <a 
+                href={isSold ? null : `mailto:${listing.sellerEmail}`} 
+                className={`${styles.primaryAction} ${isSold ? styles.actionDisabled : ''}`}
+                onClick={(e) => isSold && e.preventDefault()}
+              >
+                <Mail size={18} />
                 <span>Email Seller</span>
               </a>
-              <button className={styles.secondaryAction}>
-                <MessageCircle size={20} />
+              <button 
+                onClick={startChat} 
+                disabled={isSold}
+                className={`${styles.secondaryAction} ${isSold ? styles.actionDisabled : ''}`}
+              >
+                <MessageCircle size={18} />
                 <span>Chat Now</span>
               </button>
             </div>
+            
             <p className={styles.safetyNotice}>
               <Zap size={14} />
-              Remember to meet in a safe, public location on campus.
+              Remember to meet in a safe, public location on campus (e.g. Canteen, Block Foyer).
             </p>
           </div>
 
