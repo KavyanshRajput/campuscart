@@ -91,11 +91,8 @@ npx firebase deploy --only hosting --project campuscart-9c677
 
 ---
 
-## 👥 Contributors & Team Members
-*   **Kavyansh Rajput** (Lead Developer)
-*   **Jiya Patidar**
-*   **Anmol Soni**
-*   **Aditi Yadav**
+## 👥 Developer
+*   **Kavyansh Singh Rajput**
 
 ---
 
