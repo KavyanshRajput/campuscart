@@ -19,6 +19,19 @@ export function AuthProvider({ children }) {
   const allowedDomain = '@acropolis.in';
 
   useEffect(() => {
+    // Localhost mock bypass for local development/testing
+    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+      const mockUser = {
+        uid: 'mock_student_123',
+        email: 'testuser@acropolis.in',
+        displayName: 'KAVYANSH RAJPUT',
+        photoURL: null
+      };
+      setUser(mockUser);
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         if (user.email.endsWith(allowedDomain)) {

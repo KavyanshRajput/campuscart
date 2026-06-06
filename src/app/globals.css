@@ -55,6 +55,19 @@
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+body.dark {
+  --background: #0b0f19;
+  --surface: #131c2e;
+  --surface-subtle: #1e293b;
+  --surface-hover: #334155;
+  --text-main: #f8fafc;
+  --text-muted: #cbd5e1;
+  --text-light: #94a3b8;
+  --border: rgba(51, 65, 85, 0.5);
+  --glass: rgba(19, 28, 46, 0.8);
+  --glass-border: rgba(51, 65, 85, 0.4);
+}
+
 * {
   margin: 0;
   padding: 0;

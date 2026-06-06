@@ -62,8 +62,20 @@ function ExploreContent() {
     );
   };
 
-  // Filter listings client side based on category, search input, price range, and usage age
+  // Filter listings client side based on category, search input, price range, usage age, and block list
   const filteredListings = listings.filter(item => {
+    // Hide sold listings
+    if (item.status === 'sold') return false;
+
+    // Filter out blocked sellers
+    let blocked = [];
+    if (typeof window !== 'undefined') {
+      try {
+        blocked = JSON.parse(localStorage.getItem('blockedUsers') || '[]');
+      } catch (e) {}
+    }
+    if (blocked.includes(item.sellerId)) return false;
+
     const matchesCategory = activeCategory === 'All' || item.category?.toLowerCase() === activeCategory.toLowerCase();
     
     const matchesSearch = searchQuery.trim() === '' || 

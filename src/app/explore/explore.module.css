@@ -29,13 +29,13 @@
 
 .searchBar {
   flex: 1;
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  height: 52px;
+  padding: 0 20px;
+  height: 58px;
   transition: var(--transition);
   box-shadow: var(--shadow-sm);
 }
@@ -47,14 +47,14 @@
 
 .searchIcon {
   color: var(--text-light);
-  margin-right: 10px;
+  margin-right: 12px;
 }
 
 .searchBar input {
   background: transparent;
   border: none;
   color: var(--text-main);
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 600;
   width: 100%;
   outline: none;
@@ -65,17 +65,17 @@
 }
 
 .filterBtn {
-  height: 52px;
-  padding: 0 20px;
-  background: white;
+  height: 58px;
+  padding: 0 24px;
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
   gap: 8px;
   color: var(--text-muted);
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   transition: var(--transition);
   box-shadow: var(--shadow-sm);
 }
@@ -114,7 +114,7 @@
 .tab {
   padding: 6px 18px;
   border-radius: var(--radius-full);
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text-muted);
   font-weight: 700;
@@ -210,7 +210,7 @@
 
 .skeletonCard {
   height: 250px;
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   position: relative;
@@ -245,7 +245,7 @@
 .emptyIconWrapper {
   width: 64px;
   height: 64px;
-  background: white;
+  background: var(--surface);
   color: var(--primary);
   border-radius: var(--radius-full);
   display: flex;
@@ -290,12 +290,22 @@
   }
   
   .searchBarWrapper {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
   }
   
   .filterBtn {
+    height: 58px;
+    width: 58px;
+    padding: 0;
     justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .filterBtn span {
+    display: none;
   }
   
   .controls {
@@ -340,7 +350,7 @@
 
 /* Sidebar Widgets Cards */
 .sidebarCard {
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl); /* 24px */
   padding: 24px;
@@ -506,13 +516,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f1f5f9;
+  background: var(--surface-subtle);
   color: var(--text-muted);
   border-radius: var(--radius-lg);
   font-size: 0.82rem;
   font-weight: 750;
   transition: var(--transition);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   cursor: pointer;
 }
 

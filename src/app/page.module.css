@@ -212,7 +212,7 @@
 .searchCard {
   display: flex;
   align-items: center;
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-md);
   border-radius: var(--radius-xl); /* Extra curved: 24px */
@@ -261,90 +261,125 @@
   box-shadow: var(--shadow-sm);
 }
 
-/* Promo Banner Card - "Stuff You Should Know" matching reference */
-.promoBanner {
-  background: var(--secondary-gradient);
+/* Dynamic Action Banner */
+.actionBanner {
+  background: var(--primary-gradient);
   border-radius: var(--radius-xl);
   overflow: hidden;
-  display: flex;
   margin-bottom: 32px;
+  box-shadow: var(--shadow-purple);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   position: relative;
-  box-shadow: var(--shadow-lg);
-  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.promoContent {
-  flex: 1.2;
-  padding: 32px var(--spacing-lg) 32px 32px;
-  color: white;
+.actionBannerInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px 32px;
+  gap: 16px;
+}
+
+.actionBannerLeft {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: flex-start;
-  z-index: 10;
-}
-
-.promoSub {
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--accent);
-  font-weight: 800;
-  margin-bottom: 8px;
-}
-
-.promoContent h2 {
-  font-size: 1.6rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-  margin-bottom: 10px;
-}
-
-.promoContent p {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.5;
-  margin-bottom: 20px;
-}
-
-.promoPillBtn {
-  background: var(--accent);
-  color: var(--text-main);
-  padding: 8px 24px;
-  border-radius: var(--radius-full);
-  font-weight: 800;
-  font-size: 0.78rem;
-  box-shadow: 0 4px 14px rgba(251, 191, 36, 0.3);
-  transition: var(--transition);
-}
-
-.promoPillBtn:hover {
-  background: var(--accent-hover);
-  transform: scale(1.04);
-}
-
-.promoVisual {
-  flex: 0.8;
-  position: relative;
-  min-height: 180px;
-}
-
-.promoImage {
-  object-fit: cover;
-}
-
-.promoBanner::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 40%;
-  background: linear-gradient(to right, #1e1b4b, transparent);
-  pointer-events: none;
+  gap: 10px;
   z-index: 2;
+  flex: 1;
 }
+
+.actionBannerEyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.actionBannerTitle {
+  font-size: 1.55rem;
+  font-weight: 850;
+  color: white;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.actionBannerSub {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.5;
+  max-width: 300px;
+  margin: 0;
+}
+
+.actionBannerBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 10px 20px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 0.82rem;
+  backdrop-filter: blur(8px);
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.actionBannerBtn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.actionBannerIllustration {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.illustrationOrb {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  animation: orbPulse 3s ease-in-out infinite;
+}
+
+.illustrationIcon {
+  color: rgba(255, 255, 255, 0.9);
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 4px 12px rgba(255,255,255,0.2));
+}
+
+@keyframes orbPulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+
+@media (max-width: 480px) {
+  .actionBannerInner {
+    padding: 24px 20px;
+  }
+  .actionBannerTitle {
+    font-size: 1.25rem;
+  }
+  .actionBannerIllustration {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+
 
 /* Category Circle Grid */
 .categoriesSection {
@@ -487,7 +522,7 @@
   width: 32px;
   height: 32px;
   border-radius: var(--radius-full);
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--border);
   color: var(--primary);
   display: flex;
@@ -699,7 +734,7 @@
 }
 
 .skeletonCard {
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 12px;
@@ -841,7 +876,7 @@
 
 /* Sidebar Widgets Cards */
 .sidebarCard {
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl); /* 24px */
   padding: 24px;
@@ -891,7 +926,7 @@
 }
 
 .statItem:hover {
-  background: white;
+  background: var(--surface);
   border-color: var(--primary-light);
   transform: translateX(4px);
   box-shadow: var(--shadow-sm);
@@ -996,7 +1031,7 @@
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
   transition: var(--transition);
-  background: white;
+  background: var(--surface);
 }
 
 .wishlistItem:hover {

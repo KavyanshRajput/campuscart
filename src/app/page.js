@@ -6,9 +6,7 @@ import { collection, query, orderBy, limit, onSnapshot, doc, getDoc, where } fro
 import { useAuth } from '@/lib/AuthContext';
 import { 
   ShoppingBag, 
-  MapPin, 
   Search, 
-  ChevronDown, 
   Compass, 
   Sparkles, 
   ArrowRight,
@@ -23,7 +21,8 @@ import {
   Users,
   CheckCircle2,
   Clock,
-  GraduationCap
+  GraduationCap,
+  Download
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -40,15 +39,7 @@ const CATEGORIES = [
   { name: 'Other', icon: <Heart size={20} />, color: '#64748b', id: 'other' },
 ];
 
-const CAMPUS_LOCATIONS = [
-  "Acro Block A",
-  "Acro Block B",
-  "Acro Block C",
-  "Central Library",
-  "Acro Canteen",
-  "Sports Complex",
-  "Acro PG Block"
-];
+
 
 
 
@@ -60,22 +51,41 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  
-  const [location, setLocation] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('campusLocation') || "Acro Block A";
-    }
-    return "Acro Block A";
-  });
-  const [showLocDropdown, setShowLocDropdown] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [showInstall, setShowInstall] = useState(false);
 
-  const handleLocationChange = (loc) => {
-    setLocation(loc);
-    localStorage.setItem('campusLocation', loc);
-    setShowLocDropdown(false);
+  // PWA Install prompt capture
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setShowInstall(true);
+    };
+    const installedHandler = () => setShowInstall(false);
+
+    window.addEventListener('beforeinstallprompt', handler);
+    window.addEventListener('appinstalled', installedHandler);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('appinstalled', installedHandler);
+    };
+  }, []);
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') setShowInstall(false);
+    setInstallPrompt(null);
+  };
+  
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/explore?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
   };
 
-  // Sidebar States
   const [activities, setActivities] = useState([]);
   const [activeListingsCount, setActiveListingsCount] = useState(null);
   const [savedItems, setSavedItems] = useState([]);
@@ -178,6 +188,20 @@ export default function Home() {
     return () => window.removeEventListener('storage', handleStorageSync);
   }, [user]);
 
+  const [blockedUsers, setBlockedUsers] = useState([]);
+  useEffect(() => {
+    const checkBlocked = () => {
+      if (typeof window !== 'undefined') {
+        try {
+          setBlockedUsers(JSON.parse(localStorage.getItem('blockedUsers') || '[]'));
+        } catch (e) {}
+      }
+    };
+    checkBlocked();
+    window.addEventListener('settingsChanged', checkBlocked);
+    return () => window.removeEventListener('settingsChanged', checkBlocked);
+  }, []);
+
   useEffect(() => {
     // Robust Firestore Query Fetch with Client-side Fallback for Missing Indexes
     const listingsRef = collection(db, "listings");
@@ -202,17 +226,13 @@ export default function Home() {
     return () => unsubscribe();
   }, []);
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/explore?search=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
 
   // Get active listings filtered client-side (more robust than composite indexes)
-  const filteredListings = activeCategory === 'All' 
-    ? listings.slice(0, 8)
-    : listings.filter(item => item.category?.toLowerCase() === activeCategory.toLowerCase()).slice(0, 8);
+  const filteredListings = (activeCategory === 'All' 
+    ? listings 
+    : listings.filter(item => item.category?.toLowerCase() === activeCategory.toLowerCase()))
+    .filter(item => !blockedUsers.includes(item.sellerId))
+    .slice(0, 8);
 
   return (
     <div className={styles.page}>
@@ -220,40 +240,16 @@ export default function Home() {
       <section className={styles.premiumHeader}>
         <div className={styles.heroGridBackground}></div>
         <div className={styles.heroParticleGlow}></div>
-        <div className={`${styles.headerTop} container`}>
-          {/* Interactive Location Dropdown Selector */}
-          <div className={styles.locationSelector}>
-            <div className={styles.locBadge} onClick={() => setShowLocDropdown(!showLocDropdown)}>
-              <div className={styles.locIcon}><MapPin size={16} /></div>
-              <div className={styles.locText}>
-                <span className={styles.locLabel}>Your location</span>
-                <span className={styles.locName}>{location} <ChevronDown size={14} /></span>
-              </div>
-            </div>
-            {showLocDropdown && (
-              <div className={`${styles.locDropdown} glass-effect animate-fade-in`}>
-                {CAMPUS_LOCATIONS.map((loc) => (
-                  <button 
-                    key={loc} 
-                    className={`${styles.locOption} ${location === loc ? styles.locActive : ''}`}
-                    onClick={() => handleLocationChange(loc)}
-                  >
-                    {loc}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
 
-          {/* User Profile Avatar */}
-          <Link href="/profile" className={styles.avatarCircle}>
-            {user?.photoURL ? (
-              <Image src={user.photoURL} alt={user.displayName || "Student"} width={38} height={38} className={styles.avatarImg} />
-            ) : (
-              <div className={styles.avatarPlaceholder}><Compass size={20} /></div>
-            )}
-          </Link>
-        </div>
+        {/* Top bar with install button */}
+        {showInstall && (
+          <div className={`${styles.installBar} container`}>
+            <button onClick={handleInstall} className={styles.installBtn}>
+              <Download size={15} />
+              <span>Install App</span>
+            </button>
+          </div>
+        )}
 
         <div className={`${styles.headerContent} container animate-fade-up`}>
           <h1 className={styles.headerTitle}>
@@ -279,25 +275,45 @@ export default function Home() {
         <div className={styles.desktopLayoutGrid}>
           {/* Left / Center Main Feed */}
           <div className={styles.mainFeed}>
-            {/* Highlights Banner - "Stuff You Should Know" */}
-            <section className={`${styles.promoBanner} animate-fade-up`}>
-              <div className={styles.promoContent}>
-                <span className={styles.promoSub}>top chart of the semester</span>
-                <h2>Stuff You Should Know</h2>
-                <p>Save up to 70% by buying course textbooks from senior students in your block.</p>
-                <Link href="/explore?cat=books" className={styles.promoPillBtn}>
-                  Read Now
-                </Link>
-              </div>
-              <div className={styles.promoVisual}>
-                <Image 
-                  src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=600&auto=format&fit=crop" 
-                  alt="Books Stack" 
-                  fill
-                  className={styles.promoImage}
-                />
-              </div>
+            {/* Dynamic Personalized Action Banner */}
+            <section className={`${styles.actionBanner} animate-fade-up`}>
+              {!user ? (
+                /* Guest: Sign-in CTA */
+                <div className={styles.actionBannerInner}>
+                  <div className={styles.actionBannerLeft}>
+                    <span className={styles.actionBannerEyebrow}>🎓 Students only</span>
+                    <h2 className={styles.actionBannerTitle}>Buy & sell within<br/>your campus</h2>
+                    <p className={styles.actionBannerSub}>Sign in with your college Google account to list items, save favourites and chat with sellers.</p>
+                    <button onClick={loginWithGoogle} className={styles.actionBannerBtn}>
+                      <span>Sign in with Google</span>
+                      <ArrowRight size={16} />
+                    </button>
+                  </div>
+                  <div className={styles.actionBannerIllustration}>
+                    <div className={styles.illustrationOrb}></div>
+                    <ShoppingBag size={52} className={styles.illustrationIcon} />
+                  </div>
+                </div>
+              ) : (
+                /* Logged-in: Quick sell prompt */
+                <div className={styles.actionBannerInner}>
+                  <div className={styles.actionBannerLeft}>
+                    <span className={styles.actionBannerEyebrow}>👋 Hey, {user.displayName?.split(' ')[0] || 'there'}</span>
+                    <h2 className={styles.actionBannerTitle}>Got something<br/>to sell?</h2>
+                    <p className={styles.actionBannerSub}>List it in under 2 minutes — photo, price, done. Reach every student on campus instantly.</p>
+                    <Link href="/sell" className={styles.actionBannerBtn}>
+                      <span>Post a listing</span>
+                      <ArrowRight size={16} />
+                    </Link>
+                  </div>
+                  <div className={styles.actionBannerIllustration}>
+                    <div className={styles.illustrationOrb}></div>
+                    <Zap size={52} className={styles.illustrationIcon} />
+                  </div>
+                </div>
+              )}
             </section>
+
 
             {/* Horizontal Category Circular Grid */}
             <section className={styles.categoriesSection}>
@@ -336,10 +352,10 @@ export default function Home() {
             <section className={styles.closestSellerCard}>
               <div className={styles.closestFlex}>
                 <div className={styles.closestInfo}>
-                  <div className={styles.markerCircle}><MapPin size={18} /></div>
+                  <div className={styles.markerCircle}><Compass size={18} /></div>
                   <div>
-                    <h4>Identify the closest seller</h4>
-                    <p>Verify matching classes and blocks for safe campus handovers.</p>
+                    <h4>Find the closest seller</h4>
+                    <p>Connect with sellers on campus for safe and easy handovers.</p>
                   </div>
                 </div>
                 <Link href="/explore" className={styles.arrowCircle}>

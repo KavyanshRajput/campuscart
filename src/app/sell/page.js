@@ -43,6 +43,7 @@ export default function SellPage() {
     const images = [selectedCategory.image];
     
     try {
+      const userDept = typeof window !== 'undefined' ? localStorage.getItem('userDept') || 'CSE' : 'CSE';
       await addDoc(collection(db, "listings"), {
         ...formData,
         price: Number(formData.price),
@@ -51,6 +52,7 @@ export default function SellPage() {
         sellerName: user.displayName,
         sellerEmail: user.email,
         sellerPhoto: user.photoURL,
+        sellerDept: userDept,
         createdAt: serverTimestamp(),
         status: 'active'
       });

@@ -16,6 +16,25 @@ export default function ProductCard({ item, variant = 'grid' }) {
     return false;
   });
 
+  const [isDeptMatch, setIsDeptMatch] = useState(false);
+  const [userDeptName, setUserDeptName] = useState('');
+
+  useEffect(() => {
+    const checkDeptMatch = () => {
+      const matchAlerts = localStorage.getItem('matchAlerts') !== 'false';
+      const userDept = localStorage.getItem('userDept');
+      if (matchAlerts && userDept && item.sellerDept === userDept) {
+        setIsDeptMatch(true);
+        setUserDeptName(userDept);
+      } else {
+        setIsDeptMatch(false);
+      }
+    };
+    checkDeptMatch();
+    window.addEventListener('settingsChanged', checkDeptMatch);
+    return () => window.removeEventListener('settingsChanged', checkDeptMatch);
+  }, [item.sellerDept]);
+
   useEffect(() => {
     // Listen to changes from other components (like detail page or other cards)
     const handleFavSync = () => {
@@ -83,6 +102,11 @@ export default function ProductCard({ item, variant = 'grid' }) {
       <div className={styles.content}>
         <div className={styles.header}>
           <h3 className={styles.title}>{title}</h3>
+          {isDeptMatch && (
+            <span className={styles.matchBadge} title={`Listing from your department (${userDeptName})`}>
+              {userDeptName} Match
+            </span>
+          )}
         </div>
         
         <div className={styles.details}>

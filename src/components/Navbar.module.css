@@ -6,17 +6,17 @@
   z-index: 1000;
   padding: 20px 0;
   transition: var(--transition);
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--glass);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .scrolled {
   padding: 14px 0;
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--glass);
   box-shadow: var(--shadow-md);
-  border-bottom-color: rgba(226, 232, 240, 0.3);
+  border-bottom-color: var(--glass-border);
 }
 
 .navContent {
@@ -38,6 +38,12 @@
 .logoIcon {
   color: var(--primary);
   filter: drop-shadow(0 2px 4px rgba(91, 33, 182, 0.2));
+}
+
+.logoImg {
+  border-radius: 6px;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(91, 33, 182, 0.15);
 }
 
 .brandGrad {
@@ -182,10 +188,10 @@
     display: flex;
     justify-content: space-around;
     align-items: center;
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--glass);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl); /* Curved capsule shape matching 24px */
     height: 72px;
     box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);

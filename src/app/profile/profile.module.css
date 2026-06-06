@@ -14,7 +14,7 @@
 .loginRequired {
   text-align: center;
   padding: 80px 20px;
-  background: white;
+  background: var(--surface);
   border-radius: var(--radius-xl);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-md);
@@ -165,11 +165,11 @@
 
 .tab:hover {
   color: var(--primary);
-  background: white;
+  background: var(--surface-hover);
 }
 
 .activeTab {
-  background: white !important;
+  background: var(--surface) !important;
   color: var(--primary) !important;
   box-shadow: var(--shadow-sm);
 }
@@ -194,7 +194,7 @@
 
 .listingItem {
   display: flex;
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 16px;
@@ -332,7 +332,7 @@
   align-items: center;
   text-align: center;
   padding: 60px 20px;
-  background: white;
+  background: var(--surface);
   border-radius: var(--radius-xl);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
@@ -399,7 +399,7 @@
 .chatDashboard {
   display: flex;
   height: 520px;
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   overflow: hidden;
@@ -505,7 +505,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: white;
+  background: var(--surface);
 }
 
 .paneHeader {
@@ -537,7 +537,7 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  background: #fbfcfe;
+  background: var(--surface-subtle);
 }
 
 .messageBubble {
@@ -559,7 +559,7 @@
 
 .msgThem {
   align-self: flex-start;
-  background: white;
+  background: var(--surface);
   color: var(--text-main);
   border: 1px solid var(--border);
   border-bottom-left-radius: var(--radius-sm);
@@ -570,7 +570,7 @@
   padding: 12px 16px;
   border-top: 1px solid var(--border);
   gap: 10px;
-  background: white;
+  background: var(--surface);
 }
 
 .chatInputBar input {
@@ -582,6 +582,7 @@
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-main);
+  background: var(--surface-subtle);
   transition: var(--transition);
 }
 
@@ -647,7 +648,7 @@
 }
 
 .modalCard {
-  background: white;
+  background: var(--surface);
   width: 100%;
   max-width: 520px;
   border-radius: var(--radius-xl);
@@ -715,6 +716,11 @@
   background: white;
 }
 
+.formGroup select option {
+  background: var(--surface);
+  color: var(--text-main);
+}
+
 .formRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -758,7 +764,7 @@
 
 /* Delete confirmation card */
 .confirmCard {
-  background: white;
+  background: var(--surface);
   width: 100%;
   max-width: 400px;
   border-radius: var(--radius-xl);
@@ -850,5 +856,309 @@
   .itemActions {
     justify-content: flex-end;
     width: 100%;
+  }
+}
+
+/* Settings Page Styling */
+.settingsContainer {
+  margin-top: 10px;
+}
+
+.settingsForm {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.settingsCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-subtle);
+}
+
+.cardHeader h3 {
+  font-size: 0.95rem;
+  font-weight: 850;
+  color: var(--text-main);
+}
+
+.cardContent {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.helpText {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.toggleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.toggleRow:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.toggleInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.toggleLabel {
+  font-size: 0.88rem;
+  font-weight: 750;
+  color: var(--text-main);
+}
+
+.toggleDesc {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+/* Switch styling */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #cbd5e1;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.switch input:checked + .slider {
+  background-color: var(--primary);
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+/* Theme Toggle Button */
+.themeToggleBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--surface-subtle);
+  transition: var(--transition);
+}
+
+.themeToggleBtn:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary-light);
+}
+
+.darkActive {
+  background: var(--primary) !important;
+  color: white !important;
+  border-color: var(--primary) !important;
+}
+
+/* Blocked list styling */
+.blockedList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.blockedUserRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface-subtle);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.unblockBtn {
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+
+.unblockBtn:hover {
+  text-decoration: underline;
+}
+
+.noBlocked {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* Save preferences row */
+.settingsActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.saveSettingsBtn {
+  background: var(--primary);
+  color: white;
+  padding: 12px 36px;
+  border-radius: var(--radius-md);
+  font-weight: 750;
+  font-size: 0.88rem;
+  box-shadow: var(--shadow-purple);
+}
+
+.saveSettingsBtn:hover {
+  background: var(--primary-hover);
+}
+
+.toast {
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-weight: 700;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.toastSuccess {
+  background: var(--emerald-light);
+  color: #065f46;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.toastError {
+  background: var(--danger-light);
+  color: #991b1b;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Mobile responsive back button and viewport hides */
+.backBtn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--text-muted);
+  margin-right: 4px;
+}
+
+.backBtn:hover {
+  background: var(--surface-hover);
+  color: var(--text-main);
+}
+
+@media (max-width: 1024px) {
+  .formRow {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .backBtn {
+    display: flex !important;
+  }
+  
+  .chatSidebar.mobileHidden {
+    display: none !important;
+  }
+  
+  .chatPane.mobileHidden {
+    display: none !important;
+  }
+  
+  .chatSidebar {
+    width: 100% !important;
+    height: 100% !important;
+    border-right: none;
+  }
+  
+  .chatPane {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .cardContent {
+    padding: 16px !important;
+  }
+
+  .cardHeader {
+    padding: 12px 16px !important;
+  }
+
+  .settingsActions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .saveSettingsBtn {
+    width: 100% !important;
+    text-align: center;
   }
 }

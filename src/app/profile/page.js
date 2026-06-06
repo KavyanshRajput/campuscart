@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { db } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, orderBy, doc, deleteDoc, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, orderBy, doc, deleteDoc, updateDoc, getDoc, addDoc, serverTimestamp, getDocs } from 'firebase/firestore';
 import { 
   User, 
   UserCircle, 
@@ -21,7 +21,10 @@ import {
   X, 
   Send,
   HelpCircle,
-  ShieldAlert
+  ShieldAlert,
+  ArrowLeft,
+  Moon,
+  Sun
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -29,31 +32,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import ProductCard from '@/components/ProductCard';
 import styles from './profile.module.css';
 
-// Mock chat profiles
-const MOCK_CHATS = [
-  {
-    id: "seller1",
-    name: "Aman Sharma",
-    photo: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=150&auto=format&fit=crop",
-    item: "Scientific Calculator FX-991EX",
-    messages: [
-      { sender: 'them', text: "Hey! Yes, the scientific calculator is still available." },
-      { sender: 'me', text: "Awesome, would you be open to meeting at Block B canteen tomorrow?" },
-      { sender: 'them', text: "Sure, I have a class there at 2:00 PM. Meet you at the entrance?" }
-    ]
-  },
-  {
-    id: "seller2",
-    name: "Ritu Patel",
-    photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop",
-    item: "HC Verma Physics Vol 1",
-    messages: [
-      { sender: 'them', text: "Hi, I can give you the book for ₹250. It's in brand new condition." },
-      { sender: 'me', text: "Can we do ₹200? I can pick it up today itself." },
-      { sender: 'them', text: "Alright, deal! I am currently in the Central Library." }
-    ]
-  }
-];
+
 
 function ProfileContent() {
   const { user, loading, loginWithGoogle } = useAuth();
@@ -64,6 +43,9 @@ function ProfileContent() {
   const tabParam = searchParams.get('tab');
   const startChatId = searchParams.get('startChat');
   const itemNameParam = searchParams.get('itemName');
+  const itemIdParam = searchParams.get('itemId');
+  const sellerNameParam = searchParams.get('sellerName');
+  const sellerPhotoParam = searchParams.get('sellerPhoto');
 
   const [activeTab, setActiveTab] = useState(() => tabParam || 'listings');
   const [prevTabParam, setPrevTabParam] = useState(tabParam);
@@ -94,40 +76,183 @@ function ProfileContent() {
   const [deletingId, setDeletingId] = useState(null);
 
   // Chat states
-  const [chats, setChats] = useState(MOCK_CHATS);
-  const [selectedChatId, setSelectedChatId] = useState("seller1");
+  const [chats, setChats] = useState([]);
+  const [selectedChatId, setSelectedChatId] = useState(null);
+  const [chatMessages, setChatMessages] = useState([]);
   const [typedMessage, setTypedMessage] = useState("");
 
-  // Handle auto-starting a chat from Detail Page trigger
+  // Dark Mode State
+  const [darkMode, setDarkMode] = useState(false);
   useEffect(() => {
-    if (activeTab === 'chat' && startChatId && itemNameParam) {
-      // Check if chat exists
-      const existingIdx = chats.findIndex(c => c.id === startChatId);
-      if (existingIdx !== -1) {
-        setTimeout(() => {
-          setSelectedChatId(startChatId);
-        }, 0);
-      } else {
-        // Create new mock chat
-        const newChat = {
-          id: startChatId,
-          name: "Seller / Student",
-          photo: "",
-          item: decodeURIComponent(itemNameParam),
-          messages: [
-            { sender: 'me', text: `Hi! Is the item "${decodeURIComponent(itemNameParam)}" still available for trade?` }
-          ]
-        };
-        setTimeout(() => {
-          setChats(prev => [newChat, ...prev.filter(c => c.id !== startChatId)]);
-          setSelectedChatId(startChatId);
-        }, 0);
+    const savedDark = localStorage.getItem('darkMode') === 'true';
+    setDarkMode(savedDark);
+    if (savedDark) {
+      document.body.classList.add('dark');
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    const nextDark = !darkMode;
+    setDarkMode(nextDark);
+    localStorage.setItem('darkMode', String(nextDark));
+    document.body.classList.toggle('dark', nextDark);
+  };
+
+  // Firestore Settings States
+  const [userSettings, setUserSettings] = useState({
+    phone: '',
+    department: 'CSE',
+    semester: '6',
+    matchAlerts: true,
+    whatsappNotif: true,
+    emailNotif: true,
+    pushNotif: false,
+    blockedUsers: []
+  });
+  const [settingsLoading, setSettingsLoading] = useState(true);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [settingsMessage, setSettingsMessage] = useState(null);
+
+  useEffect(() => {
+    if (!user) return;
+    async function loadSettings() {
+      try {
+        const docRef = doc(db, 'users', user.uid);
+        const snap = await getDoc(docRef);
+        if (snap.exists()) {
+          setUserSettings(snap.data());
+        }
+      } catch (err) {
+        console.error('Error loading settings:', err);
+      } finally {
+        setSettingsLoading(false);
       }
-      
-      // Clean query params to prevent duplication on reload
+    }
+    if (activeTab === 'settings') {
+      loadSettings();
+    }
+  }, [user, activeTab]);
+
+  const saveSettings = async (e) => {
+    e.preventDefault();
+    if (!user) return;
+    setIsSavingSettings(true);
+    setSettingsMessage(null);
+    try {
+      const { setDoc } = await import('firebase/firestore');
+      await setDoc(doc(db, 'users', user.uid), userSettings, { merge: true });
+      // Update local storage so listings matching logic can read it instantly
+      localStorage.setItem('userDept', userSettings.department);
+      localStorage.setItem('matchAlerts', String(userSettings.matchAlerts));
+      localStorage.setItem('blockedUsers', JSON.stringify(userSettings.blockedUsers || []));
+      window.dispatchEvent(new Event('settingsChanged'));
+      setSettingsMessage({ type: 'success', text: 'Settings updated successfully!' });
+    } catch (err) {
+      console.error('Error saving settings:', err);
+      setSettingsMessage({ type: 'error', text: 'Failed to save settings.' });
+    } finally {
+      setIsSavingSettings(false);
+      setTimeout(() => setSettingsMessage(null), 3000);
+    }
+  };
+
+  // Handle auto-starting a chat from Detail Page trigger (Firestore-backed)
+  useEffect(() => {
+    if (activeTab !== 'chat' || !startChatId || !user) return;
+
+    async function initChat() {
+      try {
+        // Check if a chat already exists between these users (merge into single thread like WhatsApp)
+        const q = query(
+          collection(db, 'chats'),
+          where('participants', 'array-contains', user.uid)
+        );
+        const snapshot = await getDocs(q);
+
+        const decodedItemName = decodeURIComponent(itemNameParam || '');
+        let existingChat = null;
+        snapshot.docs.forEach(d => {
+          const data = d.data();
+          if (data.participants.includes(startChatId)) {
+            existingChat = { id: d.id, ...data };
+          }
+        });
+
+        if (existingChat) {
+          // If the chat exists but is for a different item, update the active negotiating item
+          if (itemNameParam && existingChat.itemName !== decodedItemName) {
+            await updateDoc(doc(db, 'chats', existingChat.id), {
+              itemId: itemIdParam || '',
+              itemName: decodedItemName
+            });
+          }
+          setSelectedChatId(existingChat.id);
+        } else {
+          // Create new chat document in Firestore
+          const newChatRef = await addDoc(collection(db, 'chats'), {
+            participants: [user.uid, startChatId],
+            participantDetails: {
+              [user.uid]: { name: user.displayName || 'Student', photo: user.photoURL || '' },
+              [startChatId]: { name: decodeURIComponent(sellerNameParam || 'Seller'), photo: decodeURIComponent(sellerPhotoParam || '') }
+            },
+            itemId: itemIdParam || '',
+            itemName: decodedItemName,
+            lastMessage: '',
+            lastMessageAt: serverTimestamp(),
+            createdAt: serverTimestamp()
+          });
+
+          setSelectedChatId(newChatRef.id);
+        }
+      } catch (err) {
+        console.error('Error initializing chat:', err);
+      }
+
       router.replace('/profile?tab=chat');
     }
-  }, [activeTab, startChatId, itemNameParam, chats, router]);
+
+    initChat();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, startChatId, user]);
+
+  // Load user's chats from Firestore (real-time)
+  useEffect(() => {
+    if (!user || activeTab !== 'chat') return;
+
+    const q = query(
+      collection(db, 'chats'),
+      where('participants', 'array-contains', user.uid)
+    );
+
+    const unsub = onSnapshot(q, (snapshot) => {
+      const chatData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      chatData.sort((a, b) => (b.lastMessageAt?.seconds || 0) - (a.lastMessageAt?.seconds || 0));
+      setChats(chatData);
+    }, (err) => {
+      console.error('Error loading chats:', err);
+    });
+
+    return () => unsub();
+  }, [user, activeTab]);
+
+  // Load messages for the selected chat (real-time)
+  useEffect(() => {
+    if (!selectedChatId) {
+      setChatMessages([]);
+      return;
+    }
+
+    const messagesRef = collection(db, 'chats', selectedChatId, 'messages');
+    const q = query(messagesRef, orderBy('createdAt', 'asc'));
+
+    const unsub = onSnapshot(q, (snapshot) => {
+      setChatMessages(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+    }, (err) => {
+      console.error('Error loading messages:', err);
+    });
+
+    return () => unsub();
+  }, [selectedChatId]);
 
   // Load User Listings
   useEffect(() => {
@@ -195,37 +320,56 @@ function ProfileContent() {
     if (activeTab === 'chat') {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [chats, selectedChatId, activeTab]);
+  }, [chatMessages, selectedChatId, activeTab]);
 
   const activeChat = chats.find(c => c.id === selectedChatId);
 
-  const sendMessage = (e) => {
-    e.preventDefault();
-    if (!typedMessage.trim() || !selectedChatId) return;
-
-    setChats(chats.map(chat => {
-      if (chat.id === selectedChatId) {
-        return {
-          ...chat,
-          messages: [...chat.messages, { sender: 'me', text: typedMessage }]
-        };
+  // De-duplicate chats list in the UI for the sidebar list (show only 1 row per contact)
+  const uniqueChats = [];
+  const seenParticipants = new Set();
+  chats.forEach(chat => {
+    const otherId = chat.participants?.find(p => p !== user.uid);
+    if (otherId) {
+      if (!seenParticipants.has(otherId)) {
+        seenParticipants.add(otherId);
+        uniqueChats.push(chat);
       }
-      return chat;
-    }));
+    } else {
+      uniqueChats.push(chat);
+    }
+  });
+
+  // Helper: get the OTHER participant's info from a chat document
+  const getOtherParticipant = (chat) => {
+    if (!user || !chat?.participantDetails) return { name: 'Student', photo: '' };
+    const otherId = chat.participants?.find(p => p !== user.uid);
+    return chat.participantDetails?.[otherId] || { name: 'Student', photo: '' };
+  };
+
+  const activeChatOther = activeChat ? getOtherParticipant(activeChat) : { name: 'Student', photo: '' };
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!typedMessage.trim() || !selectedChatId || !user) return;
+
+    const text = typedMessage.trim();
     setTypedMessage("");
 
-    // Simulate reply after 1.5 seconds
-    setTimeout(() => {
-      setChats(prevChats => prevChats.map(chat => {
-        if (chat.id === selectedChatId) {
-          return {
-            ...chat,
-            messages: [...chat.messages, { sender: 'them', text: "Awesome! Let me know where on campus works best for you." }]
-          };
-        }
-        return chat;
-      }));
-    }, 1500);
+    try {
+      await addDoc(collection(db, 'chats', selectedChatId, 'messages'), {
+        senderId: user.uid,
+        senderName: user.displayName || 'Student',
+        text,
+        createdAt: serverTimestamp()
+      });
+
+      await updateDoc(doc(db, 'chats', selectedChatId), {
+        lastMessage: text,
+        lastMessageAt: serverTimestamp()
+      });
+    } catch (err) {
+      console.error('Error sending message:', err);
+    }
   };
 
   // Toggle listing status between Sold and Active
@@ -450,57 +594,74 @@ function ProfileContent() {
         {activeTab === 'chat' && (
           <div className={`${styles.chatDashboard} glass-effect`}>
             {/* Chats List Sidebar */}
-            <div className={styles.chatSidebar}>
+            <div className={`${styles.chatSidebar} ${selectedChatId ? styles.mobileHidden : ''}`}>
               <div className={styles.sidebarHeader}>
                 <h4>Conversations</h4>
               </div>
               <div className={styles.chatsList}>
-                {chats.map(chat => (
-                  <button 
-                    key={chat.id} 
-                    className={`${styles.chatRow} ${selectedChatId === chat.id ? styles.chatRowActive : ''}`}
-                    onClick={() => setSelectedChatId(chat.id)}
-                  >
-                    <div className={styles.chatAvatar}>
-                      {chat.photo ? (
-                        <Image src={chat.photo} alt={chat.name} fill className={styles.avatarImg} />
-                      ) : (
-                        <User size={18} />
-                      )}
-                    </div>
-                    <div className={styles.chatRowInfo}>
-                      <span className={styles.chatName}>{chat.name}</span>
-                      <span className={styles.chatItemName}>{chat.item}</span>
-                      <p className={styles.lastText}>
-                        {chat.messages?.[chat.messages.length - 1]?.text || "No messages yet."}
-                      </p>
-                    </div>
-                  </button>
-                ))}
+                {uniqueChats.length === 0 ? (
+                  <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                    <MessageCircle size={28} style={{ marginBottom: '8px', opacity: 0.5 }} />
+                    <p>No conversations yet.</p>
+                    <p style={{ fontSize: '0.8rem', marginTop: '4px' }}>Visit a listing and tap Chat Now to start.</p>
+                  </div>
+                ) : uniqueChats.map(chat => {
+                  const other = getOtherParticipant(chat);
+                  return (
+                    <button 
+                      key={chat.id} 
+                      className={`${styles.chatRow} ${selectedChatId === chat.id ? styles.chatRowActive : ''}`}
+                      onClick={() => setSelectedChatId(chat.id)}
+                    >
+                      <div className={styles.chatAvatar}>
+                        {other.photo ? (
+                          <Image src={other.photo} alt={other.name} fill className={styles.avatarImg} />
+                        ) : (
+                          <User size={18} />
+                        )}
+                      </div>
+                      <div className={styles.chatRowInfo}>
+                        <span className={styles.chatName}>{other.name}</span>
+                        <span className={styles.chatItemName}>{chat.itemName}</span>
+                        <p className={styles.lastText}>
+                          {chat.lastMessage || "No messages yet."}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* Chat Conversation pane */}
-            <div className={styles.chatPane}>
+            <div className={`${styles.chatPane} ${!selectedChatId ? styles.mobileHidden : ''}`}>
               {activeChat ? (
                 <>
                   <div className={styles.paneHeader}>
+                    {/* Back Button for mobile */}
+                    <button 
+                      onClick={() => setSelectedChatId(null)} 
+                      className={styles.backBtn}
+                      type="button"
+                    >
+                      <ArrowLeft size={18} />
+                    </button>
                     <div className={styles.chatAvatar}>
-                      {activeChat.photo ? (
-                        <Image src={activeChat.photo} alt={activeChat.name} fill className={styles.avatarImg} />
+                      {activeChatOther.photo ? (
+                        <Image src={activeChatOther.photo} alt={activeChatOther.name} fill className={styles.avatarImg} />
                       ) : (
                         <User size={18} />
                       )}
                     </div>
                     <div className={styles.paneHeaderInfo}>
-                      <h5>{activeChat.name}</h5>
-                      <span className={styles.itemTag}>Negotiating: {activeChat.item}</span>
+                      <h5>{activeChatOther.name}</h5>
+                      <span className={styles.itemTag}>Negotiating: {activeChat.itemName}</span>
                     </div>
                   </div>
 
                   <div className={styles.messagesWindow}>
-                    {activeChat.messages.map((msg, idx) => (
-                      <div key={idx} className={`${styles.messageBubble} ${msg.sender === 'me' ? styles.msgMe : styles.msgThem}`}>
+                    {chatMessages.map((msg, idx) => (
+                      <div key={msg.id || idx} className={`${styles.messageBubble} ${msg.senderId === user?.uid ? styles.msgMe : styles.msgThem}`}>
                         <p>{msg.text}</p>
                       </div>
                     ))}
@@ -510,7 +671,7 @@ function ProfileContent() {
                   <form onSubmit={sendMessage} className={styles.chatInputBar}>
                     <input 
                       type="text" 
-                      placeholder="Type a message (e.g. Can we meet at block C canteen?)..." 
+                      placeholder="Type a message..." 
                       value={typedMessage}
                       onChange={(e) => setTypedMessage(e.target.value)}
                     />
@@ -530,10 +691,210 @@ function ProfileContent() {
 
         {/* Settings Tab */}
         {activeTab === 'settings' && (
-          <div className={styles.emptyContainer}>
-            <Settings size={44} />
-            <h3>Account Settings</h3>
-            <p>Profile personalization, block matching filters, and WhatsApp notification hooks are currently in development.</p>
+          <div className={styles.settingsContainer}>
+            <form onSubmit={saveSettings} className={styles.settingsForm}>
+              
+              {/* Profile Card Section */}
+              <div className={`${styles.settingsCard} glass-effect animate-fade-in`}>
+                <div className={styles.cardHeader}>
+                  <UserCircle size={20} color="var(--primary)" />
+                  <h3>Personal Information</h3>
+                </div>
+                <div className={styles.cardContent}>
+                  <div className={styles.formGroup}>
+                    <label>WhatsApp / Phone Number</label>
+                    <input 
+                      type="tel" 
+                      placeholder="e.g. +91 98765 43210" 
+                      value={userSettings.phone || ''}
+                      onChange={(e) => setUserSettings({...userSettings, phone: e.target.value})}
+                    />
+                    <small className={styles.helpText}>Buyers will use this to contact you for meetups.</small>
+                  </div>
+                  
+                  <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
+                      <label>Department / Branch</label>
+                      <select 
+                        value={userSettings.department || 'CSE'}
+                        onChange={(e) => setUserSettings({...userSettings, department: e.target.value})}
+                      >
+                        <option value="CSE">Computer Science & Eng. (CSE)</option>
+                        <option value="IT">Information Technology (IT)</option>
+                        <option value="EC">Electronics & Comm. (EC)</option>
+                        <option value="ME">Mechanical Engineering (ME)</option>
+                        <option value="Civil">Civil Engineering</option>
+                        <option value="MBA">MBA</option>
+                        <option value="MCA">MCA</option>
+                        <option value="Other">Other Department</option>
+                      </select>
+                    </div>
+                    
+                    <div className={styles.formGroup}>
+                      <label>Current Semester</label>
+                      <select 
+                        value={userSettings.semester || '6'}
+                        onChange={(e) => setUserSettings({...userSettings, semester: e.target.value})}
+                      >
+                        <option value="1">1st Semester</option>
+                        <option value="2">2nd Semester</option>
+                        <option value="3">3rd Semester</option>
+                        <option value="4">4th Semester</option>
+                        <option value="5">5th Semester</option>
+                        <option value="6">6th Semester</option>
+                        <option value="7">7th Semester</option>
+                        <option value="8">8th Semester</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Preference / Matching Filters */}
+              <div className={`${styles.settingsCard} glass-effect animate-fade-in`}>
+                <div className={styles.cardHeader}>
+                  <Heart size={20} color="var(--primary)" />
+                  <h3>Campus Matching & Filters</h3>
+                </div>
+                <div className={styles.cardContent}>
+                  <div className={styles.toggleRow}>
+                    <div className={styles.toggleInfo}>
+                      <span className={styles.toggleLabel}>Department Match Highlight</span>
+                      <p className={styles.toggleDesc}>Automatically highlight and flag listings posted by students in your department.</p>
+                    </div>
+                    <label className={styles.switch}>
+                      <input 
+                        type="checkbox" 
+                        checked={userSettings.matchAlerts ?? true}
+                        onChange={(e) => setUserSettings({...userSettings, matchAlerts: e.target.checked})}
+                      />
+                      <span className={styles.slider}></span>
+                    </label>
+                  </div>
+
+                  <div className={styles.toggleRow}>
+                    <div className={styles.toggleInfo}>
+                      <span className={styles.toggleLabel}>Dark Mode Theme</span>
+                      <p className={styles.toggleDesc}>Switch between clean light mode and premium space navy dark theme.</p>
+                    </div>
+                    <button 
+                      type="button" 
+                      onClick={toggleDarkMode} 
+                      className={`${styles.themeToggleBtn} ${darkMode ? styles.darkActive : ''}`}
+                    >
+                      {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+                      <span>{darkMode ? "Light Mode" : "Dark Mode"}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Phone Notification Settings */}
+              <div className={`${styles.settingsCard} glass-effect animate-fade-in`}>
+                <div className={styles.cardHeader}>
+                  <MessageCircle size={20} color="var(--primary)" />
+                  <h3>Notifications on Phone</h3>
+                </div>
+                <div className={styles.cardContent}>
+                  <div className={styles.toggleRow}>
+                    <div className={styles.toggleInfo}>
+                      <span className={styles.toggleLabel}>WhatsApp Alerts Hook</span>
+                      <p className={styles.toggleDesc}>Send a notification to your WhatsApp number when someone messages you about a listing.</p>
+                    </div>
+                    <label className={styles.switch}>
+                      <input 
+                        type="checkbox" 
+                        checked={userSettings.whatsappNotif ?? true}
+                        onChange={(e) => setUserSettings({...userSettings, whatsappNotif: e.target.checked})}
+                      />
+                      <span className={styles.slider}></span>
+                    </label>
+                  </div>
+
+                  <div className={styles.toggleRow}>
+                    <div className={styles.toggleInfo}>
+                      <span className={styles.toggleLabel}>Email Notifications</span>
+                      <p className={styles.toggleDesc}>Receive email digests for price drops on wishlisted items.</p>
+                    </div>
+                    <label className={styles.switch}>
+                      <input 
+                        type="checkbox" 
+                        checked={userSettings.emailNotif ?? true}
+                        onChange={(e) => setUserSettings({...userSettings, emailNotif: e.target.checked})}
+                      />
+                      <span className={styles.slider}></span>
+                    </label>
+                  </div>
+
+                  <div className={styles.toggleRow}>
+                    <div className={styles.toggleInfo}>
+                      <span className={styles.toggleLabel}>Push Alerts on Mobile</span>
+                      <p className={styles.toggleDesc}>Enable native web push notifications on your phone.</p>
+                    </div>
+                    <label className={styles.switch}>
+                      <input 
+                        type="checkbox" 
+                        checked={userSettings.pushNotif ?? false}
+                        onChange={(e) => setUserSettings({...userSettings, pushNotif: e.target.checked})}
+                      />
+                      <span className={styles.slider}></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Blocked Users Section */}
+              <div className={`${styles.settingsCard} glass-effect animate-fade-in`}>
+                <div className={styles.cardHeader}>
+                  <ShieldAlert size={20} color="var(--danger)" />
+                  <h3>Mute & Block Settings</h3>
+                </div>
+                <div className={styles.cardContent}>
+                  <p className={styles.toggleDesc} style={{ marginBottom: '12px' }}>
+                    Blocking a student hides all their listings and disables messaging between you.
+                  </p>
+                  
+                  {userSettings.blockedUsers?.length > 0 ? (
+                    <div className={styles.blockedList}>
+                      {userSettings.blockedUsers.map((uid, index) => (
+                        <div key={uid} className={styles.blockedUserRow}>
+                          <span>Student ID: {uid.substring(0, 10)}...</span>
+                          <button 
+                            type="button" 
+                            className={styles.unblockBtn}
+                            onClick={() => {
+                              const list = [...userSettings.blockedUsers];
+                              list.splice(index, 1);
+                              setUserSettings({...userSettings, blockedUsers: list});
+                            }}
+                          >
+                            Unblock
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className={styles.noBlocked}>
+                      <CheckCircle2 size={16} color="var(--emerald)" />
+                      <span>No students blocked. Nice!</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Submit Row */}
+              <div className={styles.settingsActions}>
+                {settingsMessage && (
+                  <span className={`${styles.toast} ${settingsMessage.type === 'success' ? styles.toastSuccess : styles.toastError}`}>
+                    {settingsMessage.text}
+                  </span>
+                )}
+                <button type="submit" disabled={isSavingSettings} className={styles.saveSettingsBtn}>
+                  {isSavingSettings ? "Saving Settings..." : "Save Preferences"}
+                </button>
+              </div>
+
+            </form>
           </div>
         )}
       </div>

@@ -82,7 +82,15 @@ export default function ListingClient({ id }) {
 
   const startChat = () => {
     if (!listing) return;
-    router.push(`/profile?tab=chat&startChat=${listing.sellerId}&itemName=${encodeURIComponent(listing.title)}`);
+    const params = new URLSearchParams({
+      tab: 'chat',
+      startChat: listing.sellerId,
+      itemId: listing.id,
+      itemName: listing.title,
+      sellerName: listing.sellerName || 'Seller',
+      sellerPhoto: listing.sellerPhoto || ''
+    });
+    router.push(`/profile?${params.toString()}`);
   };
 
   if (loading) {

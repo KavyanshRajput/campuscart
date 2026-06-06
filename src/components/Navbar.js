@@ -29,7 +29,7 @@ export default function Navbar() {
       <nav className={`${styles.navbar} ${scrolled ? styles.scrolled : ''} glass-effect`}>
         <div className={`${styles.navContent} container`}>
           <Link href="/" className={styles.logo}>
-            <ShoppingCart className={styles.logoIcon} size={26} />
+            <Image src="/logo.png" alt="CampusCart Logo" width={30} height={30} className={styles.logoImg} />
             <span>Campus<span className={styles.brandGrad}>Cart</span></span>
           </Link>
 
