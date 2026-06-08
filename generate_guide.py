@@ -132,8 +132,96 @@ def generate_guide():
         "from Firestore. This saves server space and works instantly without needing a backend server table."
     )
 
-    # Section 4: Database Design
-    doc.add_heading('4. Database Schema Design (Firestore)', level=1)
+    # Section 4: File-by-File Structure & Code Logic Details
+    doc.add_heading('4. Detailed File-by-File Code & Logic Breakdown', level=1)
+    doc.add_paragraph(
+        "This section explains what each file in your codebase is responsible for, how it is written, and the core coding concepts it uses."
+    )
+
+    doc.add_heading('A. src/app/layout.js (The Main Frame)', level=2)
+    doc.add_paragraph(
+        "• Purpose: This is the shell or template that wraps all pages on your website. It controls what remains visible when navigating (like the navigation header and footer).\n"
+        "• What we did in the code:\n"
+        "  1. Loaded the custom geometric font 'Outfit' from Google Fonts to give the project a premium look.\n"
+        "  2. Wrapped the entire application content with the `<AuthProvider>` context component. This ensures that every single page knows immediately if a user is logged in or out.\n"
+        "  3. Rendered the `<Navbar />` at the top and the `<Footer />` at the bottom of the content container."
+    )
+
+    doc.add_heading('B. src/lib/AuthContext.js (The Guard Gate)', level=2)
+    doc.add_paragraph(
+        "• Purpose: Manages user logins, logouts, credentials, and keeps track of who is currently using the app.\n"
+        "• What we did in the code:\n"
+        "  1. Set up a listener (`onAuthStateChanged`) that monitors if a user is logged in via Firebase Auth.\n"
+        "  2. Added the domain lock filter: if the user's email domain does not end with '@acropolis.in', it calls `signOut(auth)` immediately to reject them and sets an error message state.\n"
+        "  3. Programmed a 'Localhost mock bypass': if the code detects the website is running locally on `localhost:3000` (development mode), it skips the live Google Sign-In redirect (which is blocked on localhost) and automatically logs in as a mock student profile. This allows you to test settings, chats, and lists instantly without database blockages.\n"
+        "  4. Wrapped state setters (`setUser` and `setLoading`) inside asynchronous `setTimeout` triggers to satisfy React's hooks performance standards."
+    )
+
+    doc.add_heading('C. src/lib/firebase.js (The Connection Bridge)', level=2)
+    doc.add_paragraph(
+        "• Purpose: Initializes the connection between your Next.js application and the Firebase cloud servers.\n"
+        "• What we did in the code:\n"
+        "  1. Loaded the Firebase project configurations using environment variables (`process.env.NEXT_PUBLIC_...`). This is a security best practice so your private keys are not exposed in the git repository.\n"
+        "  2. Instantiated and exported the core Firebase client services: `auth` (for users), `db` (Firestore database), and `storage` (for images)."
+    )
+
+    doc.add_heading('D. src/app/page.js (The Homepage)', level=2)
+    doc.add_paragraph(
+        "• Purpose: Renders the home screen that users see when they open the website. It contains search bars, category boxes, a live activity ticker, recent items, and a campus stats widget.\n"
+        "• What we did in the code:\n"
+        "  1. Coded a live Firestore listener (`onSnapshot`) that queries the `listings` collection ordered by creation date. It filters out any listing marked as `'sold'` and stores it in the `listings` state.\n"
+        "  2. Set up a PWA install prompt handler that listens to the browser's `beforeinstallprompt` event, saving it to state and rendering a floating 'Install App' banner if the app can be installed.\n"
+        "  3. Programmed a 'Campus Pulse' widget that calculates the live count of active items and the number of active unique sellers directly from the Firestore collection snapshot.\n"
+        "  4. Built a live activity ticker that monitors modifications in the collection and adds message updates (like 'Student listed Cooler for Rs 2000') using React state arrays."
+    )
+
+    doc.add_heading('E. src/app/explore/page.js (The Search & Filter Hub)', level=2)
+    doc.add_paragraph(
+        "• Purpose: Renders the full catalog page where students search, browse, and filter listings.\n"
+        "• What we did in the code:\n"
+        "  1. Listened to URL query parameters (e.g. `?search=textbook`) to pre-fill search fields.\n"
+        "  2. Programmed client-side filtering logic that filters listings by categories, maximum price (using an interactive slider), and item age/condition checkbox selections.\n"
+        "  3. Created an interface toggle allowing students to switch the catalog display between a Grid view (multi-column) and a List view (stacked)."
+    )
+
+    doc.add_heading('F. src/app/sell/page.js (The Listing Form)', level=2)
+    doc.add_paragraph(
+        "• Purpose: Renders the form that allows students to list items for sale.\n"
+        "• What we did in the code:\n"
+        "  1. Set up a standard HTML form with inputs for Title, Price, Category, Age/Condition, and Description.\n"
+        "  2. Mapped the selected category to a specific default image illustration (e.g. a book graphic for 'Books' or a gadget graphic for 'Electronics') to give listings a fallback thumbnail.\n"
+        "  3. Handled form submissions by calling Firestore's `addDoc` to upload the product details, along with the logged-in student's Google profile photo, name, and email."
+    )
+
+    doc.add_heading('G. src/app/profile/page.js (The Dashboard & Chat Engine)', level=2)
+    doc.add_paragraph(
+        "• Purpose: Renders the personal dashboard where students manage their listings, favorites, settings, and messaging.\n"
+        "• What we did in the code:\n"
+        "  1. **Listings Management:** Queries Firestore for listings matching `sellerId == user.uid`. Added action buttons to trigger `deleteDoc` (deleting items), `updateDoc` (marking items as sold or editing details via forms).\n"
+        "  2. **Saved Wishlist:** Reads the listing IDs stored in the browser's `localStorage`, fetches the details of those specific items from Firestore, and renders them.\n"
+        "  3. **Live Chat Engine:** Renders a split-pane layout (conversations list on the left, active chat window on the right). It listens to the `chats` collection in real-time. Typing a message triggers `addDoc` into a sub-collection `chats/{chatId}/messages`, and updates `lastMessage` on the parent chat document. Used scroll-into-view references to automatically snap chat threads to the latest message.\n"
+        "  4. **Settings Form:** Handles profile preferences (WhatsApp contact hook, department selection, and semester level) and saves them in the `users` collection in Firestore. Added toggles to enable/disable notifications and to manage user blocks (muting specific sellers).\n"
+        "  5. **Dark Mode Toggle:** Reads and writes the `'darkMode'` key in `localStorage` and toggles a `.dark` CSS class on `document.body` to switch the global color scheme in real-time."
+    )
+
+    doc.add_heading('H. src/components/ProductCard.js (The Item Template)', level=2)
+    doc.add_paragraph(
+        "• Purpose: A reusable, modular component that displays a summary of a single listing.\n"
+        "• What we did in the code:\n"
+        "  1. Built the card tile to display the product thumbnail, category tag, title, price, usage age, and a customized sold badge overlay.\n"
+        "  2. Coded a Heart button that handles wishlist bookmarks: it checks if the item is in `localStorage.getItem('savedItems')`, toggles its presence, and triggers storage synchronizations."
+    )
+
+    doc.add_heading('I. firestore.rules & firebase.json (The Security Configuration)', level=2)
+    doc.add_paragraph(
+        "• Purpose: Controls cloud database permissions and deployment targets.\n"
+        "• What we did in the code:\n"
+        "  1. Configured security rules that allow read and write operations on your database collections under an extended timeframe (valid until December 31, 2026), preventing your app from being locked down by Firebase's 30-day default expiration.\n"
+        "  2. Configured `firebase.json` to map the `firestore.rules` script to your deployment configuration, ensuring the rules are tracked in version control and pushed automatically when running database deployments."
+    )
+
+    # Section 5: Database Design
+    doc.add_heading('5. Database Schema Design (Firestore)', level=1)
     doc.add_paragraph(
         "Firestore is a NoSQL database. It organizes data in 'Collections' (folders) which contain 'Documents' (files). "
         "Each document contains 'Fields' (data pairs). We have 3 main Collections:"
@@ -171,8 +259,8 @@ def generate_guide():
         "• blockedUsers (Array): List of user IDs they have muted/blocked"
     )
 
-    # Section 5: Project Exhibition Viva Q&A Guide
-    doc.add_heading('5. Project Exhibition Viva Q&A (Be Prepared!)', level=1)
+    # Section 6: Project Exhibition Viva Q&A Guide
+    doc.add_heading('6. Project Exhibition Viva Q&A (Be Prepared!)', level=1)
     doc.add_paragraph(
         "Here are the most common questions an evaluator will ask during your project exhibition, "
         "along with the exact, easy-to-understand answers you should give:"
