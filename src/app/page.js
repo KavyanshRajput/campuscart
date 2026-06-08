@@ -149,7 +149,9 @@ export default function Home() {
   // Saved items loader
   useEffect(() => {
     if (!user) {
-      setSavedItems([]);
+      setTimeout(() => {
+        setSavedItems([]);
+      }, 0);
       return;
     }
     
@@ -479,7 +481,7 @@ export default function Home() {
                   {savedItems.map(item => (
                     <Link key={item.id} href={`/listing?id=${item.id}`} className={styles.wishlistItem}>
                       <div className={styles.wishlistImgWrapper}>
-                        <img src={item.images?.[0] || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=150&auto=format&fit=crop'} alt={item.title} className={styles.wishlistImg} />
+                        <Image src={item.images?.[0] || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=150&auto=format&fit=crop'} alt={item.title} fill className={styles.wishlistImg} sizes="44px" />
                       </div>
                       <div className={styles.wishlistInfo}>
                         <h5 className={styles.wishlistTitle}>{item.title}</h5>

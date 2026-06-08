@@ -85,7 +85,9 @@ function ProfileContent() {
   const [darkMode, setDarkMode] = useState(false);
   useEffect(() => {
     const savedDark = localStorage.getItem('darkMode') === 'true';
-    setDarkMode(savedDark);
+    setTimeout(() => {
+      setDarkMode(savedDark);
+    }, 0);
     if (savedDark) {
       document.body.classList.add('dark');
     }
@@ -238,7 +240,9 @@ function ProfileContent() {
   // Load messages for the selected chat (real-time)
   useEffect(() => {
     if (!selectedChatId) {
-      setChatMessages([]);
+      setTimeout(() => {
+        setChatMessages([]);
+      }, 0);
       return;
     }
 

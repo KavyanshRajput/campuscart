@@ -27,8 +27,10 @@ export function AuthProvider({ children }) {
         displayName: 'KAVYANSH RAJPUT',
         photoURL: null
       };
-      setUser(mockUser);
-      setLoading(false);
+      setTimeout(() => {
+        setUser(mockUser);
+        setLoading(false);
+      }, 0);
       return;
     }
 
