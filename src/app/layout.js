@@ -38,6 +38,29 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="CampusCart" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                var v = "v_cc_force_reset_2";
+                if (localStorage.getItem("cc_pwa_v") !== v) {
+                  localStorage.setItem("cc_pwa_v", v);
+                  if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(function(regs) {
+                      for(var i = 0; i < regs.length; i++) regs[i].unregister();
+                    });
+                  }
+                  if ('caches' in window) {
+                    caches.keys().then(function(names) {
+                      for (var i = 0; i < names.length; i++) caches.delete(names[i]);
+                    });
+                  }
+                  window.location.reload(true);
+                }
+              })();
+            `,
+          }}
+        />
       </head>
       <body className={outfit.className}>
         <AuthProvider>
